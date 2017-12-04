@@ -26,29 +26,49 @@ public class MarketSummaryService {
 			.getLogger(MarketSummaryService.class);
 	@Value("${pivotal.summary.quotes:3}")
 	private Integer numberOfQuotes;
-	
+
 	//10 minutes in milliseconds
 	@Value("${pivotal.summary.refresh:600000}")
 	private final static String refresh_period = "600000";
-	
+
 	//private static List<String> symbolsIT = Arrays.asList("EMC", "ORCL", "IBM", "INTC", "AMD", "HPQ", "CSCO", "AAPL");
 	//private static List<String> symbolsFS = Arrays.asList("JPM", "C", "MS", "BAC", "GS", "WFC","BK");
 	@Value("${pivotal.summary.symbols.it:EMC,IBM,VMW}")
 	private String symbolsIT;
     @Value("${pivotal.summary.symbols.fs:JPM,C,MS}")
 	private String symbolsFS;
-    
+
     @Autowired
 	private QuotesService marketService;
-    
+
 	private MarketSummary summary = new MarketSummary();
-	
+
 	public MarketSummary getMarketSummary() {
 		logger.debug("Retrieving Market Summary: " + summary);
-		
-		return summary;
+
+		//validate the contents of the summary
+        if(summary != null) {
+            if(summary.getTopGainers() == null || summary.getTopGainers().size() != numberOfQuotes) {
+                logger.debug("Retrieve Market Summary - TopGainers not complete, refreshing");
+                try {
+                    summary.setTopGainers(getTopThree(symbolsIT));
+                } catch (Exception e) {
+                    logger.error("Can't refresh top gainers", e);
+                }
+            }
+            if(summary.getTopLosers() == null || summary.getTopLosers().size() != numberOfQuotes) {
+                logger.debug("Retrieve Market Summary - TopLosers not complete, refreshing");
+                try {
+                    summary.setTopLosers(getTopThree(symbolsFS));
+                } catch (Exception e) {
+                    logger.error("Can't refresh top losers", e);
+                }
+            }
+        }
+
+				return summary;
 	}
-	
+
 	@Scheduled(fixedRateString = refresh_period)
 	protected void retrieveMarketSummary() {
 		logger.debug("Scheduled retrieval of Market Summary");
@@ -58,7 +78,7 @@ public class MarketSummaryService {
 		 */
 		//List<Quote> quotesIT = pickRandomThree(Arrays.asList(symbolsIT.split(","))).parallelStream().map(symbol -> getQuote(symbol)).collect(Collectors.toList());
 		//List<Quote> quotesFS = pickRandomThree(Arrays.asList(symbolsFS.split(","))).parallelStream().map(symbol -> getQuote(symbol)).collect(Collectors.toList());
-		
+
 		//List<Quote> quotesFS = pickRandomThree(Arrays.asList(symbolsFS.split(","))).stream().map(symbol -> marketService.getQuote(symbol)).collect(Collectors.toList());
 		summary.setTopGainers(getTopThree(symbolsIT));
 		summary.setTopLosers(getTopThree(symbolsFS));
@@ -78,7 +98,7 @@ public class MarketSummaryService {
 		}
 		return marketService.getMultipleQuotes(builder.toString());
 	}
-	
+
 	private List<String> pickRandomThree(List<String> symbols) {
 		List<String> list = new ArrayList<>();
 		Collections.shuffle(symbols);

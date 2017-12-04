@@ -129,7 +129,29 @@ public class QuoteService {
 				+ yahoo_url);
 		logger.debug("env URL: "
 				+ ENV);
-		YahooQuoteResponse response = restTemplate.getForObject(yahoo_url,
+
+        String[] symbolList = symbols.split(",");
+        List<Quote> result = new ArrayList<Quote>();
+
+        for(String symbol:symbolList) {
+            try {
+                logger.debug("Load " + symbol);
+                Quote q = getQuote(symbol);
+                if(q != null) {
+                    logger.debug("Found " + symbol);
+                    result.add(q);
+                } else {
+                    logger.debug("Did not find " + symbol);
+                }
+            } catch (Exception e) {
+                logger.error("Failed to load " + symbol, e);
+                e.printStackTrace();
+            }
+        }
+
+        return result;
+/*
+        YahooQuoteResponse response = restTemplate.getForObject(yahoo_url,
 				YahooQuoteResponse.class, ENV, symbols, FMT);
 		logger.debug("Got response: " + response);
 		List<Quote> quotes = response
@@ -141,6 +163,7 @@ public class QuoteService {
 						response.getResults().getCreated()))
 				.collect(Collectors.toList());
 		return quotes;
+*/
 	}
 
 
