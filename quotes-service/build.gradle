@@ -25,13 +25,15 @@ repositories {
 }
 
 
+// Apply versioning to all projects from versioning script.
+
 apply plugin: 'java'
 apply plugin: 'jacoco'
 apply from: "$projectDir/gradle/versioning.gradle"
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: "io.spring.dependency-management"
-//apply plugin: "com.gorylenko.gradle-git-properties"
+apply plugin: "com.gorylenko.gradle-git-properties"
 
 println version
 
@@ -74,7 +76,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 repositories {
-		mavenCentral()
+	  mavenCentral()
 		maven { url "http://repo.spring.io/release" }
 		maven { url "http://repo.spring.io/milestone" }
 		maven { url "http://repo.spring.io/snapshot" }
@@ -83,35 +85,28 @@ repositories {
 dependencyManagement {
 		imports {
 			mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudStarterParentTrain}"
-            mavenBom "io.pivotal.spring.cloud:spring-cloud-services-dependencies:${scsVersion}"
+        mavenBom "io.pivotal.spring.cloud:spring-cloud-services-dependencies:${scsVersion}"
 		}
 }
-
 dependencies {
 
 		// shared dependencies for all services
 		compile "org.springframework.boot:spring-boot-starter-web"
 		compile "org.springframework.boot:spring-boot-starter-actuator"
-		compile "org.springframework.boot:spring-boot-starter-data-jpa"
 		compile "org.springframework.cloud:spring-cloud-starter-sleuth"
 		//compile "org.springframework.cloud:spring-cloud-starter-zipkin"
 		compile "org.springframework.cloud:spring-cloud-sleuth-zipkin-stream"
 		compile "org.springframework.cloud:spring-cloud-starter-stream-rabbit"
 
+
 		compile "io.pivotal.spring.cloud:spring-cloud-services-starter-config-client"
 		compile "io.pivotal.spring.cloud:spring-cloud-services-starter-service-registry"
 		compile "io.pivotal.spring.cloud:spring-cloud-services-starter-circuit-breaker"
-
-
-
-
 
 		//test packages
 		testCompile "org.springframework.boot:spring-boot-starter-test"
 		testCompile "junit:junit:$junitVersion"
 		testRuntime "com.jayway.jsonpath:json-path"
-		// Runtime
-		runtime "org.hsqldb:hsqldb"
 
 }
 	// process substitutions in yml files.
@@ -120,8 +115,7 @@ processResources {
 }
 
 
-jar { baseName = 'accounts' }
-description = "Micro-service to deal with accounts and user logins"
-
+jar { baseName = 'quotes' }
+description = "Micro-service to retrieve up to date quotes"
 
 task wrapper(type: Wrapper) { gradleVersion = '2.12' }

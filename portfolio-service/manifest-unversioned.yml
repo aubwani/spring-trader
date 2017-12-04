@@ -5,7 +5,7 @@ memory: 1G
 env:
     SPRING_PROFILES_ACTIVE: cloud
 applications:
-- name: accounts
+- name: portfolio
   random-route: true
-  path: libs/accounts-${version}.jar
+  path: libs/portfolio-${version}.jar
   services: [ traderdb, discovery-service, circuit-breaker-dashboard, config-server, zipkinRabbit ]

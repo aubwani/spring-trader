@@ -1,0 +1,11 @@
+---
+timeout: 180
+instances: 1
+memory: 1G
+env:
+    SPRING_PROFILES_ACTIVE: cloud
+applications:
+- name: webtrader
+  random-route: true
+  path: libs/web-${version}.jar
+  services: [ discovery-service, circuit-breaker-dashboard, config-server, zipkinRabbit ]

@@ -4,6 +4,7 @@ buildscript {
 		springCloudStarterParentTrain = 'Dalston.SR1'
 		scsVersion = '1.4.1.RELEASE'
 		junitVersion = '4.12'
+		thymeleafExtras = '3.0.2.RELEASE'
 	}
 
 	repositories {
@@ -24,31 +25,31 @@ repositories {
 	mavenCentral()
 }
 
+// Apply versioning to all projects from versioning script.
+	apply plugin: 'java'
+	apply plugin: 'jacoco'
+	apply from: "$projectDir/gradle/versioning.gradle"
+	apply plugin: 'eclipse'
+	apply plugin: 'org.springframework.boot'
+	apply plugin: "io.spring.dependency-management"
+	apply plugin: "com.gorylenko.gradle-git-properties"
 
-apply plugin: 'java'
-apply plugin: 'jacoco'
-apply from: "$projectDir/gradle/versioning.gradle"
-apply plugin: 'eclipse'
-apply plugin: 'org.springframework.boot'
-apply plugin: "io.spring.dependency-management"
-//apply plugin: "com.gorylenko.gradle-git-properties"
+	println version
 
-println version
+	test { finalizedBy jacocoTestReport }
 
-test { finalizedBy jacocoTestReport }
-
-task manifestFilter(type: Copy) {
+	task manifestFilter(type: Copy) {
 		from 'manifest-unversioned.yml'
 		into "${buildDir}/"
 		rename { String fileName ->
 			fileName.replace('-unversioned', '')
 		}
 		expand(version: "${version}")
-}
+	}
 
-assemble { finalizedBy manifestFilter }
+	assemble { finalizedBy manifestFilter }
 
-jacocoTestReport {
+	jacocoTestReport {
 		group = "Reporting"
 		description = "Generate Jacoco coverage reports after running tests."
 		reports {
@@ -64,35 +65,33 @@ jacocoTestReport {
 		}
 
 		additionalSourceDirs = files(sourceSets.main.allJava.srcDirs)
-}
+	}
 
 
-jacoco { toolVersion = "0.7.5+" //	reportsDir = file("$buildDir/customJacocoReportDir")
-}
+	jacoco { toolVersion = "0.7.5+" //	reportsDir = file("$buildDir/customJacocoReportDir")
+	}
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+	sourceCompatibility = 1.8
+	targetCompatibility = 1.8
 
-repositories {
+	repositories {
 		mavenCentral()
 		maven { url "http://repo.spring.io/release" }
 		maven { url "http://repo.spring.io/milestone" }
 		maven { url "http://repo.spring.io/snapshot" }
-}
+	}
 
-dependencyManagement {
+	dependencyManagement {
 		imports {
 			mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudStarterParentTrain}"
             mavenBom "io.pivotal.spring.cloud:spring-cloud-services-dependencies:${scsVersion}"
 		}
-}
-
-dependencies {
+	}
+	dependencies {
 
 		// shared dependencies for all services
 		compile "org.springframework.boot:spring-boot-starter-web"
 		compile "org.springframework.boot:spring-boot-starter-actuator"
-		compile "org.springframework.boot:spring-boot-starter-data-jpa"
 		compile "org.springframework.cloud:spring-cloud-starter-sleuth"
 		//compile "org.springframework.cloud:spring-cloud-starter-zipkin"
 		compile "org.springframework.cloud:spring-cloud-sleuth-zipkin-stream"
@@ -101,27 +100,21 @@ dependencies {
 		compile "io.pivotal.spring.cloud:spring-cloud-services-starter-config-client"
 		compile "io.pivotal.spring.cloud:spring-cloud-services-starter-service-registry"
 		compile "io.pivotal.spring.cloud:spring-cloud-services-starter-circuit-breaker"
-
-
-
-
+		compile "org.springframework.boot:spring-boot-starter-thymeleaf"
+		compile "org.springframework.boot:spring-boot-starter-security"
+		compile "org.thymeleaf.extras:thymeleaf-extras-springsecurity4"
 
 		//test packages
 		testCompile "org.springframework.boot:spring-boot-starter-test"
 		testCompile "junit:junit:$junitVersion"
-		testRuntime "com.jayway.jsonpath:json-path"
-		// Runtime
-		runtime "org.hsqldb:hsqldb"
 
-}
+	}
 	// process substitutions in yml files.
-processResources {
+	processResources {
 		filesMatching("**/*.yml") { expand(project.properties) }
-}
+	}
 
-
-jar { baseName = 'accounts' }
-description = "Micro-service to deal with accounts and user logins"
-
+	jar { baseName = 'web' }
+	description = "Web interface to the springboot set of services"
 
 task wrapper(type: Wrapper) { gradleVersion = '2.12' }

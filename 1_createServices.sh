@@ -1,5 +1,5 @@
 cf create-service p-service-registry standard discovery-service
-cf create-service p-config-server standard config-server
+cf create-service p-config-server standard config-server -c '{"git": { "uri": "https://github.com/pivotal-bank/cf-SpringBootTrader-config.git" } }'
 cf create-service p-circuit-breaker-dashboard standard circuit-breaker-dashboard
 ######## MySQL
 cf create-service p-mysql 100mb traderdb
